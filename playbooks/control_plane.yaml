@@ -1,0 +1,7 @@
+- name: Install Helm and Cilium
+  hosts: "master"
+  become: yes
+  roles:
+    - helm
+    - cilium
+    - argocd

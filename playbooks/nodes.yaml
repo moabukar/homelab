@@ -1,0 +1,5 @@
+- name: Setup K8s Nodes
+  hosts: "node1,node2,node3,node4"
+  become: true
+  roles:
+    - nodes
