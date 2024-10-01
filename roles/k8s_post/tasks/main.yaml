@@ -1,0 +1,34 @@
+- name: add label to master
+  shell: kubectl label node master role=master
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
+
+- name: add label to node1
+  shell: kubectl label node node1 role=node1
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
+
+- name: add label to node2
+  shell: kubectl label node node2 role=node2
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
+
+- name: add label to node3
+  shell: kubectl label node node3 role=node3
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
+
+- name: add label to node4
+  shell: kubectl label node node4 role=node4
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
+
+- name: allow master node to schedule pods
+  shell: kubectl taint nodes master node-role.kubernetes.io/control-plane:NoSchedule-
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
+
+- name: add label to workers
+  shell: kubectl label node node1 type=worker && kubectl label node node2 type=worker && kubectl label node node3 type=worker && kubectl label node node4 type=worker
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
