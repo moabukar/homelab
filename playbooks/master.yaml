@@ -2,4 +2,5 @@
   hosts: "master"
   become: true
   roles:
-    - master
+  - k8s
+  # - master

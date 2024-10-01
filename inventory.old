@@ -1,0 +1,11 @@
+[master]
+rpi-master ansible_host=192.168.1.100
+
+[nodes]
+rpi-node1 ansible_host=192.168.1.101
+rpi-node2 ansible_host=192.168.1.102
+rpi-node3 ansible_host=192.168.1.103
+
+[all:vars]
+ansible_user=pi
+ansible_ssh_private_key_file=~/.ssh/id_rsa

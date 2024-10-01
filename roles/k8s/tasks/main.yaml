@@ -1,4 +1,3 @@
----
 - name: Disable Swap
   command: swapoff -a
   when: ansible_swaptotal_mb > 0
@@ -9,8 +8,8 @@
     fstype: swap
     state: absent
   with_items:
-    - swap
-    - none
+  - swap
+  - none
 
 - name: Reduce Swappiness
   ansible.posix.sysctl:
@@ -18,24 +17,52 @@
     value: '0'
     state: present
 
-- name: Add K8s GPG Key
-  apt_key:
-    url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+- name: Install required packages
+  apt:
+    name:
+    - curl
+    - ca-certificates
     state: present
-  register: add_repository_key
-
-- name: Add K8s Repo
-  apt_repository:
-    repo: deb https://apt.kubernetes.io/ kubernetes-xenial main
-    state: present
-    update_cache: true
-
-- name: Install Kubeadm, Kubelet and Kubernetes-cni
-  ansible.builtin.apt:
     update_cache: yes
-    pkg:
-      - kubelet
-      - kubeadm
-      - kubernetes-cni
 
+- name: Download k3s installation script
+  get_url:
+    url: https://get.k3s.io
+    dest: /tmp/k3s_install.sh
+    mode: '0755'
 
+- name: Install k3s
+  command: /tmp/k3s_install.sh
+  args:
+    creates: /usr/local/bin/k3s
+
+- name: Wait for k3s to start
+  wait_for:
+    path: /etc/rancher/k3s/k3s.yaml
+    state: present
+    delay: 10
+    timeout: 300
+
+- name: Copy k3s.yaml to user's home directory
+  copy:
+    src: /etc/rancher/k3s/k3s.yaml
+    dest: "{{ ansible_env.HOME }}/.kube/config"
+    remote_src: yes
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: '0600'
+
+- name: Create kubectl symlink
+  file:
+    src: /usr/local/bin/k3s
+    dest: /usr/local/bin/kubectl
+    state: link
+
+- name: Get nodes
+  command: k3s kubectl get nodes
+  register: get_nodes
+  changed_when: false
+
+- name: Display nodes
+  debug:
+    var: get_nodes.stdout_lines
